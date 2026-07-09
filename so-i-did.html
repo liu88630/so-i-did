@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>so I did 💛</title>
+<!-- 加入主畫面（iOS）設定 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="so I did">
+<meta name="theme-color" content="#0E0D10">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root { --bg:#0E0D10; --card:#141216; --line:#2A2830; --gold:#F2C14E; --mut:#8B8794; }
+  html, body { background:var(--bg); color:#F6F3EE;
+    font-family:-apple-system,"PingFang TC","Helvetica Neue",Helvetica,Arial,sans-serif; }
+  body { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+  .wrap { max-width:430px; margin:0 auto; padding:20px 16px 0; }
+  header h1 { font-size:24px; font-weight:800; letter-spacing:-0.02em; }
+  header p { font-size:13px; color:var(--mut); margin-top:4px; }
+
+  .frame { margin-top:18px; border:1px solid var(--line); border-radius:18px; overflow:hidden; }
+  .slot { position:relative; width:100%; aspect-ratio:9/8; background:#1a181d; cursor:pointer; }
+  .slot img.ph { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .slot .empty { position:absolute; inset:0; display:flex; flex-direction:column; gap:8px;
+    align-items:center; justify-content:center; color:var(--mut); }
+  .empty .plus { width:46px; height:46px; border-radius:50%; border:1px solid #F2C14E55;
+    color:var(--gold); display:flex; align-items:center; justify-content:center; font-size:24px; }
+  .empty span { font-size:11px; letter-spacing:0.2em; text-transform:uppercase; }
+  .overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    padding:0 20px; pointer-events:none; }
+  .overlay p { text-align:center; color:#fff; font-weight:700; line-height:1.25;
+    font-size:clamp(15px,4.5vw,22px);
+    text-shadow:0 1px 4px rgba(0,0,0,.75), 0 0 12px rgba(0,0,0,.35); }
+  .small .overlay p { font-size:clamp(10px,2.8vw,14px); }
+
+  label.cap { display:block; margin:18px 0 8px; font-size:11px; letter-spacing:0.2em;
+    text-transform:uppercase; color:var(--mut); }
+  input.txt { width:100%; background:transparent; border:1px solid var(--line); border-radius:14px;
+    padding:13px 16px; font-size:16px; color:#F6F3EE; outline:none; }
+  input.txt:focus { border-color:var(--gold); }
+  input.txt::placeholder { color:#5b5864; }
+
+  button { font-family:inherit; border:none; cursor:pointer; }
+  .save { width:100%; margin-top:16px; padding:14px; border-radius:14px; font-size:16px;
+    font-weight:800; background:var(--gold); color:#141216; }
+  .save:disabled { opacity:.3; }
+  .hint { margin-top:10px; text-align:center; font-size:12px; color:var(--mut); }
+
+  .datechip { display:inline-block; font-size:11px; font-weight:800; letter-spacing:0.15em;
+    padding:4px 8px; border-radius:6px; background:#F2C14E22; color:var(--gold); }
+  .divide { display:flex; align-items:center; gap:12px; margin:26px 0 12px; }
+  .divide .line { flex:1; height:1px; background:var(--line); }
+  .entry { margin-bottom:22px; }
+  .entry .frame { margin-top:0; border-radius:14px; }
+  .row { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
+  .export { background:none; color:var(--gold); font-size:14px; font-weight:700; padding:6px 0; }
+  .del { background:none; color:var(--mut); font-size:12px; padding:6px 0; }
+  .stat { font-size:14px; color:var(--mut); margin-top:18px; }
+  .stat b { color:var(--gold); }
+  .emptyState { padding:70px 0; text-align:center; color:var(--mut); font-size:14px; }
+  .emptyState .big { font-size:40px; margin-bottom:12px; }
+
+  /* 月曆 */
+  .calHead { display:flex; align-items:center; justify-content:space-between; margin-top:18px; }
+  .calHead h2 { font-size:18px; font-weight:800; letter-spacing:0.02em; }
+  .calHead button { background:none; color:var(--gold); font-size:22px; font-weight:800;
+    padding:6px 14px; }
+  .calGrid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:14px; }
+  .dow { text-align:center; font-size:10px; letter-spacing:0.15em; color:var(--mut);
+    padding-bottom:4px; }
+  .day { position:relative; aspect-ratio:1; border-radius:10px; background:var(--card);
+    border:1px solid var(--line); overflow:hidden; display:flex; align-items:center;
+    justify-content:center; font-size:13px; color:#6B6875; }
+  .day.blank { background:transparent; border:none; }
+  .day.has { cursor:pointer; border-color:var(--gold); color:#fff; font-weight:800; }
+  .day.has img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    opacity:.55; }
+  .day.has span { position:relative; text-shadow:0 1px 3px rgba(0,0,0,.8); }
+  .day.today { box-shadow:0 0 0 2px var(--gold) inset; }
+  .day.sel { box-shadow:0 0 0 2px var(--gold); }
+  .calCount { margin-top:14px; font-size:13px; color:var(--mut); }
+  .calCount b { color:var(--gold); }
+  #calDetail { margin-top:18px; }
+
+  nav { position:fixed; left:0; right:0; bottom:0; display:flex; justify-content:center;
+    background:rgba(20,18,22,.92); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); z-index:10; }
+  nav .inner { display:flex; width:100%; max-width:430px; }
+  nav button { flex:1; padding:16px 0; background:none; font-size:14px; font-weight:800; color:#6B6875; }
+  nav button.on { color:var(--gold); }
+
+  #toast { position:fixed; left:50%; transform:translateX(-50%);
+    bottom:calc(90px + env(safe-area-inset-bottom)); background:var(--gold); color:#141216;
+    font-size:14px; font-weight:700; padding:9px 18px; border-radius:999px; z-index:20;
+    opacity:0; transition:opacity .25s; pointer-events:none; }
+  #toast.show { opacity:1; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>so I did <span style="color:var(--gold)">💛</span></h1>
+    <p>記下每一件「本來不想做，但還是做了」的事</p>
+  </header>
+
+  <!-- 今天 -->
+  <div id="pageToday">
+    <div class="frame">
+      <div class="slot" id="slotTop">
+        <div class="empty"><div class="plus">+</div><span>上格照片</span></div>
+        <div class="overlay"><p id="ovTop">I didn't want to …</p></div>
+      </div>
+      <div class="slot" id="slotBottom">
+        <div class="empty"><div class="plus">+</div><span>下格照片</span></div>
+        <div class="overlay"><p>so I did</p></div>
+      </div>
+    </div>
+    <label class="cap" for="txt">I didn't want to…</label>
+    <input class="txt" id="txt" maxlength="80" placeholder="leave my hometown" autocomplete="off">
+    <button class="save" id="btnSave" disabled>存進今天的日記</button>
+    <p class="hint">點上下格選照片 · 存檔後可匯出 9:16 圖片發限動<br>所有紀錄只存在這台手機上，不會上傳</p>
+  </div>
+
+  <!-- 日記 -->
+  <div id="pageDiary" class="hidden">
+    <p class="stat" id="stat"></p>
+    <div id="list"></div>
+  </div>
+
+  <!-- 月曆 -->
+  <div id="pageCal" class="hidden">
+    <div class="calHead">
+      <button id="calPrev">‹</button>
+      <h2 id="calTitle"></h2>
+      <button id="calNext">›</button>
+    </div>
+    <div class="calGrid" id="calGrid"></div>
+    <p class="calCount" id="calCount"></p>
+    <div id="calDetail"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<input type="file" accept="image/*" id="filePick" class="hidden">
+
+<nav><div class="inner">
+  <button id="tabToday" class="on">＋ 今天</button>
+  <button id="tabDiary">📓 日記</button>
+  <button id="tabCal">📅 月曆</button>
+</div></nav>
+
+<script>
+// ---------- IndexedDB（資料只存在這台裝置的瀏覽器裡）----------
+let db;
+const openDB = () => new Promise((res, rej) => {
+  const r = indexedDB.open('soIDid', 1);
+  r.onupgradeneeded = () => r.result.createObjectStore('entries', { keyPath: 'id' });
+  r.onsuccess = () => { db = r.result; res(); };
+  r.onerror = () => rej(r.error);
+});
+const dbAll = () => new Promise((res, rej) => {
+  const q = db.transaction('entries').objectStore('entries').getAll();
+  q.onsuccess = () => res(q.result || []); q.onerror = () => rej(q.error);
+});
+const dbPut = (e) => new Promise((res, rej) => {
+  const q = db.transaction('entries','readwrite').objectStore('entries').put(e);
+  q.onsuccess = res; q.onerror = () => rej(q.error);
+});
+const dbDel = (id) => new Promise((res, rej) => {
+  const q = db.transaction('entries','readwrite').objectStore('entries').delete(id);
+  q.onsuccess = res; q.onerror = () => rej(q.error);
+});
+
+// ---------- helpers ----------
+const $ = (s) => document.querySelector(s);
+const pad = (n) => String(n).padStart(2,'0');
+const todayKey = () => { const d = new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); };
+const pretty = (k) => k.replaceAll('-','.');
+const toast = (m) => { const t = $('#toast'); t.textContent = m; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200); };
+
+const compress = (file, maxW = 1000) => new Promise((res, rej) => {
+  const img = new Image(); const url = URL.createObjectURL(file);
+  img.onload = () => {
+    const s = Math.min(1, maxW / img.width);
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.85));
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); rej(); };
+  img.src = url;
+});
+const loadImg = (src) => new Promise((res, rej) => {
+  const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+
+// ---------- 今天：兩格照片 + 文字 ----------
+let topImg = null, bottomImg = null, pickTarget = null;
+
+const setSlot = (slotEl, src) => {
+  let img = slotEl.querySelector('img.ph');
+  if (!img) { img = document.createElement('img'); img.className = 'ph';
+    slotEl.insertBefore(img, slotEl.firstChild); }
+  img.src = src;
+  slotEl.querySelector('.empty').style.display = 'none';
+};
+
+$('#slotTop').onclick = () => { pickTarget = 'top'; $('#filePick').click(); };
+$('#slotBottom').onclick = () => { pickTarget = 'bottom'; $('#filePick').click(); };
+$('#filePick').onchange = async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    const data = await compress(f);
+    if (pickTarget === 'top') { topImg = data; setSlot($('#slotTop'), data); }
+    else { bottomImg = data; setSlot($('#slotBottom'), data); }
+  } catch { toast('讀取照片失敗'); }
+  e.target.value = ''; refreshSave();
+};
+
+$('#txt').oninput = () => {
+  $('#ovTop').textContent = "I didn't want to " + ($('#txt').value || '…');
+  refreshSave();
+};
+const refreshSave = () => {
+  $('#btnSave').disabled = !(topImg && bottomImg && $('#txt').value.trim());
+};
+
+$('#btnSave').onclick = async () => {
+  const entry = { id: String(Date.now()), ts: Date.now(), dateKey: todayKey(),
+    text: $('#txt').value.trim(), topImg, bottomImg };
+  try {
+    await dbPut(entry);
+    topImg = bottomImg = null; $('#txt').value = '';
+    $('#ovTop').textContent = "I didn't want to …";
+    ['#slotTop','#slotBottom'].forEach(s => {
+      const el = $(s); const img = el.querySelector('img.ph'); if (img) img.remove();
+      el.querySelector('.empty').style.display = 'flex';
+    });
+    refreshSave(); toast('已存進日記 💛'); showTab('diary');
+  } catch { toast('儲存失敗，空間可能不足'); }
+};
+
+// ---------- 日記 ----------
+async function renderDiary() {
+  const list = $('#list'); list.innerHTML = '';
+  let entries = [];
+  try { entries = await dbAll(); } catch {}
+  entries.sort((a,b) => b.ts - a.ts);
+
+  if (!entries.length) {
+    $('#stat').textContent = '';
+    list.innerHTML = '<div class="emptyState"><div class="big">📓</div>還沒有紀錄。去「今天」做第一則吧。</div>';
+    return;
+  }
+  const groups = {};
+  entries.forEach(e => (groups[e.dateKey] = groups[e.dateKey] || []).push(e));
+  const keys = Object.keys(groups).sort().reverse();
+  $('#stat').innerHTML = '已經勇敢了 <b>' + keys.length + '</b> 天';
+
+  keys.forEach(dk => {
+    const div = document.createElement('div');
+    div.innerHTML = '<div class="divide"><span class="datechip">' + pretty(dk) +
+      '</span><div class="line"></div></div>';
+    groups[dk].forEach(e => div.appendChild(buildEntry(e, renderDiary)));
+    list.appendChild(div);
+  });
+}
+
+// 產生單則紀錄卡片（日記與月曆共用），onChange 為刪除後的重繪函式
+function buildEntry(e, onChange) {
+  const en = document.createElement('div'); en.className = 'entry';
+  en.innerHTML =
+    '<div class="frame small">' +
+      '<div class="slot" style="cursor:default"><img class="ph" src="' + e.topImg + '">' +
+        '<div class="overlay"><p></p></div></div>' +
+      '<div class="slot" style="cursor:default"><img class="ph" src="' + e.bottomImg + '">' +
+        '<div class="overlay"><p>so I did</p></div></div>' +
+    '</div>' +
+    '<div class="row"><button class="export">匯出 9:16 圖片 ↓</button>' +
+    '<button class="del">刪除</button></div>';
+  en.querySelector('.overlay p').textContent = "I didn't want to " + e.text;
+  en.querySelector('.export').onclick = () => exportEntry(e).catch(() => toast('匯出失敗'));
+  en.querySelector('.del').onclick = async () => {
+    if (!confirm('刪除這則紀錄？')) return;
+    await dbDel(e.id); onChange();
+  };
+  return en;
+}
+
+// ---------- 月曆 ----------
+let calYear, calMonth, calSelected = null; // calMonth: 0-11
+
+async function renderCal() {
+  if (calYear === undefined) {
+    const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth();
+  }
+  let entries = [];
+  try { entries = await dbAll(); } catch {}
+  const groups = {};
+  entries.sort((a,b) => b.ts - a.ts)
+    .forEach(e => (groups[e.dateKey] = groups[e.dateKey] || []).push(e));
+
+  $('#calTitle').textContent = calYear + ' 年 ' + (calMonth + 1) + ' 月';
+  const grid = $('#calGrid'); grid.innerHTML = '';
+  ['日','一','二','三','四','五','六'].forEach(d => {
+    const el = document.createElement('div'); el.className = 'dow'; el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  const first = new Date(calYear, calMonth, 1);
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const tk = todayKey();
+  let braveDays = 0;
+
+  for (let i = 0; i < first.getDay(); i++) {
+    const b = document.createElement('div'); b.className = 'day blank'; grid.appendChild(b);
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = calYear + '-' + pad(calMonth + 1) + '-' + pad(d);
+    const cell = document.createElement('div'); cell.className = 'day';
+    const has = groups[key] && groups[key].length;
+    if (has) {
+      braveDays++;
+      cell.classList.add('has');
+      cell.innerHTML = '<img src="' + groups[key][0].topImg + '"><span>' + d + '</span>';
+      cell.onclick = () => {
+        calSelected = (calSelected === key) ? null : key;
+        renderCal();
+      };
+    } else {
+      cell.textContent = d;
+    }
+    if (key === tk) cell.classList.add('today');
+    if (key === calSelected) cell.classList.add('sel');
+    grid.appendChild(cell);
+  }
+
+  $('#calCount').innerHTML = braveDays
+    ? '這個月勇敢了 <b>' + braveDays + '</b> 天'
+    : '這個月還沒有紀錄';
+
+  const detail = $('#calDetail'); detail.innerHTML = '';
+  if (calSelected && groups[calSelected]) {
+    const head = document.createElement('div');
+    head.innerHTML = '<div class="divide"><span class="datechip">' + pretty(calSelected) +
+      '</span><div class="line"></div></div>';
+    detail.appendChild(head);
+    groups[calSelected].forEach(e => detail.appendChild(buildEntry(e, renderCal)));
+  }
+}
+
+$('#calPrev').onclick = () => {
+  calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; }
+  calSelected = null; renderCal();
+};
+$('#calNext').onclick = () => {
+  calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; }
+  calSelected = null; renderCal();
+};
+
+// ---------- 匯出 1080x1920 ----------
+function wrapText(ctx, text, maxW) {
+  const words = text.split(' '); const lines = []; let line = '';
+  for (const w of words) {
+    const t = line ? line + ' ' + w : w;
+    if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; }
+    else line = t;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+function drawCover(ctx, img, x, y, w, h) {
+  const s = Math.max(w / img.width, h / img.height);
+  const iw = img.width * s, ih = img.height * s;
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+  ctx.drawImage(img, x + (w - iw) / 2, y + (h - ih) / 2, iw, ih); ctx.restore();
+}
+async function exportEntry(e) {
+  const W = 1080, H = 1920;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  const halves = [
+    { src: e.topImg, text: "I didn't want to " + e.text, y: 0 },
+    { src: e.bottomImg, text: 'so I did', y: H / 2 }
+  ];
+  for (const h of halves) {
+    drawCover(ctx, await loadImg(h.src), 0, h.y, W, H / 2);
+    ctx.font = '700 58px -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const lines = wrapText(ctx, h.text, W - 160), lh = 76;
+    const startY = h.y + H / 4 - (lines.length - 1) * lh / 2;
+    lines.forEach((line, i) => {
+      ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 2;
+      ctx.fillStyle = '#fff'; ctx.fillText(line, W / 2, startY + i * lh);
+    });
+    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  }
+  const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+  const file = new File([blob], 'so-i-did-' + e.dateKey + '.png', { type: 'image/png' });
+  // iOS：優先用系統分享（可直接存到照片）
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file] }); return; } catch (err) {
+      if (err.name === 'AbortError') return;
+    }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = file.name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+// ---------- tabs ----------
+function showTab(t) {
+  $('#pageToday').classList.toggle('hidden', t !== 'today');
+  $('#pageDiary').classList.toggle('hidden', t !== 'diary');
+  $('#pageCal').classList.toggle('hidden', t !== 'cal');
+  $('#tabToday').classList.toggle('on', t === 'today');
+  $('#tabDiary').classList.toggle('on', t === 'diary');
+  $('#tabCal').classList.toggle('on', t === 'cal');
+  if (t === 'diary') renderDiary();
+  if (t === 'cal') renderCal();
+}
+$('#tabToday').onclick = () => showTab('today');
+$('#tabDiary').onclick = () => showTab('diary');
+$('#tabCal').onclick = () => showTab('cal');
+
+openDB().catch(() => toast('此瀏覽器不支援本機儲存'));
+</script>
+</body>
+</html>
