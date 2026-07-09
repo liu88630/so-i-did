@@ -31,9 +31,9 @@
   .overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
     padding:0 20px; pointer-events:none; }
   .overlay p { text-align:center; color:#fff; font-weight:700; line-height:1.25;
-    font-size:clamp(15px,4.5vw,22px);
+    font-size:clamp(19px,6vw,28px);
     text-shadow:0 1px 4px rgba(0,0,0,.75), 0 0 12px rgba(0,0,0,.35); }
-  .small .overlay p { font-size:clamp(10px,2.8vw,14px); }
+  .small .overlay p { font-size:clamp(13px,3.8vw,18px); }
 
   label.cap { display:block; margin:18px 0 8px; font-size:11px; letter-spacing:0.2em;
     text-transform:uppercase; color:var(--mut); }
@@ -389,9 +389,9 @@ async function exportEntry(e) {
   ];
   for (const h of halves) {
     drawCover(ctx, await loadImg(h.src), 0, h.y, W, H / 2);
-    ctx.font = '700 58px -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif';
+    ctx.font = '700 78px -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    const lines = wrapText(ctx, h.text, W - 160), lh = 76;
+    const lines = wrapText(ctx, h.text, W - 140), lh = 100;
     const startY = h.y + H / 4 - (lines.length - 1) * lh / 2;
     lines.forEach((line, i) => {
       ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 2;
